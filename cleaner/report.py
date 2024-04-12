@@ -16,7 +16,7 @@ def create_ica_report(ica, epochs, filename, ncomponents=None):
         layout = mne.channels.make_eeg_layout(epochs.info)
         outlines = 'head'
 
-    topomap_args = {'outlines': outlines, 'layout': layout}
+    topomap_args = {'outlines': outlines}
 
     json_fname = filename.replace('.fif', '.json')
 
@@ -120,8 +120,7 @@ def create_ica_report(ica, epochs, filename, ncomponents=None):
     </script>"""
 
     report.include += style
-    fig_comps = ica.plot_components(inst=epochs, outlines=outlines,
-                                    layout=layout, picks=range(ncomponents))
+    fig_comps = ica.plot_components(inst=epochs, outlines=outlines, picks=range(ncomponents))
 
     overall_comment = u"""
     <div class="ica_menu">
@@ -134,18 +133,20 @@ def create_ica_report(ica, epochs, filename, ncomponents=None):
 
     </div>"""
 
-    report.add_figs_to_section(figs=[fig_comps], captions=['Topographies'],
+    report.add_figure(fig=[fig_comps], caption=['Topographies'],
                                section='Overall',
-                               comments=[overall_comment.format(json_fname)])
+                               title=overall_comment.format(json_fname))
     plt.close(fig_comps)
 
     figs_props = ica.plot_properties(epochs, picks=range(ncomponents),
                                           topomap_args=topomap_args)
     figs_ts = []
-    sources = ica.get_sources(epochs).get_data()
+    sources = ica.get_sources(epochs).get_data(copy=False)
     n_sources = sources.shape[0]
     n_random = 5
-    n_epochs = 5
+    n_epochs = 1
+    print(epochs)
+    print(n_sources, n_epochs)
     for i_comp in range(ncomponents):
         logger.info('Plotting component {} of {}'.format(
             i_comp + 1, ncomponents))
@@ -177,8 +178,8 @@ def create_ica_report(ica, epochs, filename, ncomponents=None):
 
     figs = [elt for sublist in zip(figs_props, figs_ts)
             for elt in sublist]
-    report.add_figs_to_section(figs=figs, captions=captions,
-                               comments=comments, section='Details')
+    report.add_figure(fig=figs, caption=captions,
+                                section='Details', title='Clean Data')
     [plt.close(x) for x in figs_props]
 
     return report

@@ -36,19 +36,23 @@ from cleaner.utils import configure_logging, remove_file_logging
 # Option A: Create report for ICA cleaning
 # Option B: Interactive (slow)
 
+from pipeline import raw_data_path
+
+default_path = default_path = raw_data_path[:-4] + '-ica-epo.fif'
+
 default_scaling = 75e-6
 default_ncomps = 10
 
 parser = ArgumentParser(description='Clean a RAW (continous) file.')
 parser.add_argument('--path', metavar='path', nargs=1, type=str,
+                    default=default_path,
                     help='Path with the Epochs file or the subjects folder '
-                         '(if using NICE Extensions package).',
-                    required=True)
+                         '(if using NICE Extensions package).')
 
 parser.add_argument('--icaname', metavar='icaname', nargs=1, type=str,
                     help='Name of the ICA file '
                     '(if not using NICE Extensions package).',
-                    default=None)
+                    default='auto')
     
 parser.add_argument('--scaling', metavar='scaling', type=float, nargs='?',
                     default=default_scaling,
@@ -207,7 +211,7 @@ elif interactive is True:
 else:
     reject(path, ica)
     report = create_ica_report(ica, inst, nname, ncomponents=ncomps)
-    report_fname = op.basename(nname).replace('-ica.fif', '-ica-report.html')
+    report_fname = op.basename(nname).replace('-epo-ica.fif', '-report.html')
     
     report.save(op.join(op.dirname(path), report_fname), 
-                overwrite=True, open_browser=False)
+                overwrite=True, open_browser=True)

@@ -33,6 +33,9 @@ from cleaner.utils import configure_logging, remove_file_logging
 
 # Read a raw file, plot and select bad channels.
 
+from pipeline import raw_data_path
+default_path = raw_data_path
+
 default_scaling = 30e-6
 default_lpass = 40
 default_hpass = 1
@@ -40,9 +43,9 @@ default_hpass = 1
 
 parser = ArgumentParser(description='Clean a RAW (continous) file.')
 parser.add_argument('--path', metavar='path', nargs=1, type=str,
+                    default=default_path,
                     help='Path with the file or the subjects folder (if using '
-                          'NICE Extensions package).',
-                    required=True)
+                          'NICE Extensions package).')
     
 parser.add_argument('--scaling', metavar='scaling', type=float, nargs='?',
                     default=default_scaling,
@@ -93,8 +96,7 @@ if config is None:
     raws = mne.io.read_raw_fif(path, preload=True)
     fname = path
 else:
-    import nice_ext
-    raws = nice_ext.api.read(path, config=config)
+    raws = mne.io.read_raw_fif(path)
 
 if not path.endswith('/') and op.isdir(path):
     path = '{}/'.format(path)

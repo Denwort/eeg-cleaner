@@ -33,14 +33,17 @@ from cleaner.utils import configure_logging, remove_file_logging
 
 # Read an epochs file, plot and select bad channels.
 
+from pipeline import raw_data_path
+default_path = raw_data_path[:-4] + '-pca-epo.fif'
+
 default_scaling = 75e-6
 default_nepochs = 10
 
 parser = ArgumentParser(description='Clean a RAW (continous) file.')
 parser.add_argument('--path', metavar='path', nargs=1, type=str,
+                    default=default_path,
                     help='Path with the file or the subjects folder (if using '
-                          'NICE Extensions package).',
-                    required=True)
+                          'NICE Extensions package).')
     
 parser.add_argument('--scaling', metavar='scaling', type=float, nargs='?',
                     default=default_scaling,
@@ -90,8 +93,7 @@ if config is None:
     epochs = mne.read_epochs(path, preload=True)
     fname = path
 else:
-    import nice_ext
-    epochs = nice_ext.api.read(path, config=config)
+    epochs = mne.read_epochs(path)
 
 if not isinstance(epochs, list):
     epochs = [epochs]
